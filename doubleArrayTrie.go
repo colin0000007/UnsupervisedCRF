@@ -58,8 +58,8 @@ func (n *node) String() string {
 }
 
 const (
-	BUF_SIZE  = 16384
-	UNIT_SIZE = 8
+	//BUF_SIZE  = 16384
+	//UNIT_SIZE = 8
 	// 初始化base大小
 	INIT_SIZE = 65536 * 32
 )
@@ -77,6 +77,8 @@ type DoubleArrayTrie struct {
 	nextCheckPos int         //下一次insert可能开始的检查位置
 }
 
+// 由于不想对外暴露DoubleArrayTrie的字段，但是gob协议中又需要编码
+// 所以被迫这里使用一个中间结构来达到目的
 type DATExport struct {
 	Check        []int
 	Base         []int
@@ -282,7 +284,6 @@ func (d *DoubleArrayTrie) BuildWithSort(keys []string) error {
 	return d.build_(keys, nil, true)
 }
 
-// BOBgrk&600
 func (d *DoubleArrayTrie) build_(keys []string, vals interface{}, needSort bool) error {
 	if vals != nil {
 		typeOf := reflect.TypeOf(vals)
@@ -426,6 +427,7 @@ func (d *DoubleArrayTrie) CommonPrefixSearch(prefix string) []string {
 }
 
 // 保存build好的DAT到指定路径
+// 使用gob协议
 func (d *DoubleArrayTrie) Store(path string) error {
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
@@ -458,7 +460,7 @@ func (d *DoubleArrayTrie) Store(path string) error {
 func (d *DoubleArrayTrie) Load(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Println(file)
+		log.Println(err)
 		return err
 	}
 	defer file.Close()
