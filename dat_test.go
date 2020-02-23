@@ -172,3 +172,15 @@ func TestStoreLoad(t *testing.T) {
 	}
 	fmt.Println("allocSize:", dat.allocSize)
 }
+
+var c chan int = make(chan int, 1)
+
+func TestChan(t *testing.T) {
+	go func() {
+		c <- 1
+		fmt.Println("In func")
+	}()
+
+	fmt.Println(<-c)
+	fmt.Println(<-c)
+}
