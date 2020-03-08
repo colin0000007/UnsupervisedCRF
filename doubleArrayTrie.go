@@ -379,6 +379,8 @@ func (d *DoubleArrayTrie) IndexOf(key string) (int, bool) {
 //		-2：当前key作为了公共前缀，无法得到index
 //		>=0: 当前key正常搜索到
 // TODO 至今还不清楚为什么原代码中需要在for外面多转一次
+// [解决] 对于根节点调用fetch，darts中因为pre==cur并不会跳过，所以依然产生一个节点放到children中，所以导致有一次多的状态转移
+// 		  而我的实现，对于pre==cur是跳过的，不会产生NULL节点放到children中，所以不会多一次转移
 func (d *DoubleArrayTrie) ExactMatchSearch(key string) (res int, ok bool) {
 	if len(key) == 0 {
 		return -1, false
@@ -388,6 +390,7 @@ func (d *DoubleArrayTrie) ExactMatchSearch(key string) (res int, ok bool) {
 	begin := d.base[0]
 	// root + code(a) -> s1, check[root + code[a]] = root
 	// s1 + code[b] -> s2, check[s1 + code[b]] = s1
+	fmt.Println("base[0]:", d.base[0])
 	for i := 0; i < kLen; i++ {
 		// 状态转移函数的输入
 		index := begin + int(chs[i]+1)
@@ -397,6 +400,7 @@ func (d *DoubleArrayTrie) ExactMatchSearch(key string) (res int, ok bool) {
 		}
 		// 转移到下一个状态
 		begin = d.base[index]
+		fmt.Println("index:", index, "begin:", begin)
 	}
 	//log.Println("begin:", begin)
 	if begin < 0 {

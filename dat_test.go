@@ -172,3 +172,10 @@ func TestStoreLoad(t *testing.T) {
 	}
 	fmt.Println("allocSize:", dat.allocSize)
 }
+
+func TestExactMatch(t *testing.T) {
+	dat := new(DoubleArrayTrie)
+	dat.Build1([]string{"1", "2", "3"})
+	index, _ := dat.IndexOf("2")
+	fmt.Println(index)
+}
