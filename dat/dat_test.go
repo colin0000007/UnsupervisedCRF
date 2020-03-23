@@ -1,10 +1,11 @@
-package UnsupervisedCRF
+package dat
 
 import (
 	"fmt"
 	"log"
 	"math/rand"
 	"sort"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -45,7 +46,7 @@ func TestMake(t *testing.T) {
 }
 
 func TestBuild(t *testing.T) {
-	samples := makeSample(1000, 3, 8)
+	samples := makeSample(1000000, 3, 8)
 	dat := NewDoubleArrayTrie()
 	err := dat.Build1(samples)
 	if err != nil {
@@ -59,7 +60,7 @@ func TestBuild(t *testing.T) {
 		id, ok := dat.IndexOf(samples[i])
 		if !ok {
 			errCount++
-			fmt.Printf("-1,may common prefix or not exists, sample = '%s'\n", samples[i])
+			fmt.Printf("-1,may common prefix or not exists, index = %d", id)
 		} else {
 			fmt.Println(samples[id] == samples[i])
 		}
@@ -69,10 +70,10 @@ func TestBuild(t *testing.T) {
 		_, ok := dat.IndexOf(samples[i])
 		if !ok {
 			errCount++
-			fmt.Println(samples[i])
+			//fmt.Println(samples[i])
 		}
 	}
-	log.Printf("build done, indexOf erred num %d", errCount)
+	log.Printf("build done, indexOf error num %d", errCount)
 }
 
 // 构建词库的字符集，会随机使用
@@ -173,14 +174,53 @@ func TestStoreLoad(t *testing.T) {
 	fmt.Println("allocSize:", dat.allocSize)
 }
 
-var c chan int = make(chan int, 1)
+func TestExactMatch(t *testing.T) {
+	dat := new(DoubleArrayTrie)
+	dat.Build1([]string{"1", "2", "3"})
+	index, _ := dat.IndexOf("2")
+	fmt.Println(index)
+}
 
-func TestChan(t *testing.T) {
-	go func() {
-		c <- 1
-		fmt.Println("In func")
-	}()
+// 测试直接声明的切片的len和cap
+// 测试nil 切片是否调用len是否长度为0
+func TestSlice(t *testing.T) {
+	//var sli = []int{}
+	var sli = make([]int, 0)
+	t.Log("len:", len(sli), "cap:", cap(sli))
+	var sli2 []*int = nil
+	t.Log("nil len:", len(sli2))
+}
 
-	fmt.Println(<-c)
-	fmt.Println(<-c)
+type NilWriter struct {
+}
+
+func (w *NilWriter) Write(p []byte) (n int, err error) {
+	return 0, nil
+}
+
+func BenchmarkBuild(b *testing.B) {
+	sizes := []int64{
+		1000000,
+		2000000,
+		3000000,
+		4000000,
+		5000000,
+		6000000,
+		7000000,
+		8000000,
+		9000000,
+		10000000,
+	}
+	// 不打印日志
+	log.SetOutput(&NilWriter{})
+	for _, size := range sizes {
+		b.Run("keySize_"+strconv.FormatInt(size, 10), func(b *testing.B) {
+			samples := makeSample(int(size), 3, 8)
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				dat := NewDoubleArrayTrie()
+				dat.Build1(samples)
+			}
+		})
+	}
 }

@@ -1,4 +1,4 @@
-package UnsupervisedCRF
+package crf
 
 // 	非监督学习CRF实现
 
