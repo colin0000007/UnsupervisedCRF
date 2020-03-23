@@ -180,6 +180,11 @@ func TestExactMatch(t *testing.T) {
 	index, _ := dat.IndexOf("2")
 	fmt.Println(index)
 }
+<<<<<<< HEAD:dat/dat_test.go
+=======
+
+var c chan int = make(chan int, 1)
+>>>>>>> d1920bc979f909795e58223be11b725efcade1b2:dat_test.go
 
 // 测试直接声明的切片的len和cap
 // 测试nil 切片是否调用len是否长度为0
